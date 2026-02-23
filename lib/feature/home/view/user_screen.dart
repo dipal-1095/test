@@ -16,9 +16,9 @@ class _UserScreenState extends State<UserScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-   // WidgetsBinding.instance.addPostFrameCallback((_){
-   //    context.read<UserCubit>().fetchUser();
-   //  })
+    // WidgetsBinding.instance.addPostFrameCallback((_){
+    //    context.read<UserCubit>().fetchUser();
+    //  })
     context.read<UserCubit>().fetchUser();
   }
 
@@ -67,15 +67,14 @@ class _UserScreenState extends State<UserScreen> {
                       InkWell(
                         onTap: () {
                           Navigator.of(context).push(
-              MaterialPageRoute
-              (
-                            builder: (_) => BlocProvider(
-                              create: (context) => UserCubit(),
-                              child: UpdateUserScreen(user: user),
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<UserCubit>(),
+                                child: UpdateUserScreen(user: user),
+                              ),
                             ),
-                          ),
-                        );
-              },
+                          );
+                        },
                         child: Icon(Icons.edit, color: Colors.yellow),
                       ),
                     ],

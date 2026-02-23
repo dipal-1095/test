@@ -23,13 +23,9 @@ class AuthCubit extends Cubit<AuthState> {
 
       final response = await authRepo.login(request);
 
-      if (response != null) {
-        emit(
-          state.copyWith(status: AuthStatus.success, message: "Login success"),
-        );
-      } else {
-        emit(state.copyWith(status: AuthStatus.error, message: "Login Failed"));
-      }
+      emit(
+        state.copyWith(status: AuthStatus.success, message: "Login success"),
+      );
     } catch (e) {
       emit(state.copyWith(status: AuthStatus.error, message: e.toString()));
     }

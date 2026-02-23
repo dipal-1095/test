@@ -18,6 +18,8 @@ class _UpdateUserScreenState extends State<UpdateUserScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool showPassword = true;
 
   @override
   void initState() {
@@ -25,10 +27,13 @@ class _UpdateUserScreenState extends State<UpdateUserScreen> {
     super.initState();
     emailController.text = widget.user.email ?? '';
     nameController.text = widget.user.name ?? '';
+    passwordController.text = widget.user.password ?? '';
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Update User Screen")),
       body: Form(
         key: formKey,
         child: Padding(
@@ -36,6 +41,18 @@ class _UpdateUserScreenState extends State<UpdateUserScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  hintText: "Enter Name",
+                  labelText: "Name",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                validator: (value) => ValidateCheck.emptyValidation(value),
+              ),
+              SizedBox(height: 10),
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
@@ -49,15 +66,28 @@ class _UpdateUserScreenState extends State<UpdateUserScreen> {
               ),
               SizedBox(height: 10),
               TextFormField(
-                controller: nameController,
+                obscureText: showPassword,
+                controller: passwordController,
                 decoration: InputDecoration(
-                  hintText: "Enter Name",
-                  labelText: "Name",
+                  hintText: "Enter Password",
+                  labelText: "Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      showPassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        showPassword = !showPassword;
+                      });
+                    },
+                  ),
                 ),
-                validator: (value) => ValidateCheck.emptyValidation(value),
+                validator: (value) => ValidateCheck.passwordValidation(value),
               ),
               SizedBox(height: 10),
               SizedBox(
@@ -66,11 +96,15 @@ class _UpdateUserScreenState extends State<UpdateUserScreen> {
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
                       UserModel user = UserModel(
+                        id: widget.user.id,
                         email: emailController.text,
                         name: nameController.text,
+                        password: passwordController.text,
                       );
-                      // context.read<UserCubit>().updateUser(
-                      // );
+                      context.read<UserCubit>().updateUser(
+                        widget.user.id!,
+                        user,
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -79,17 +113,21 @@ class _UpdateUserScreenState extends State<UpdateUserScreen> {
                     ),
                     backgroundColor: Colors.purple.shade400,
                   ),
-                  child: BlocBuilder<UserCubit, UserState>(
+                  child: BlocConsumer<UserCubit, UserState>(
+                    listener: (context, state) {
+                      if (state.userStatus == UserStatus.success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("User updated successfully!")),
+                        );
+                        Navigator.of(context).pop();
+                      }
+                    },
                     builder: (context, state) {
                       if (state.userStatus == UserStatus.loading) {
                         return Padding(
                           padding: const EdgeInsets.all(3.0),
                           child: CircularProgressIndicator(color: Colors.white),
                         );
-                      }
-
-                      if (state.userStatus == UserStatus.success) {
-                        Navigator.of(context).pop();
                       }
 
                       return Text(

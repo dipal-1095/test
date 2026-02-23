@@ -18,7 +18,7 @@ class UserCubit extends Cubit<UserState> {
 
       final users = await userRepo.fetchUser();
 
-      if (users != null) {
+      if (users.isNotEmpty) {
         emit(state.copyWith(status: UserStatus.success, userModel: users));
       } else {
         emit(state.copyWith(status: UserStatus.empty, userModel: []));
@@ -47,12 +47,12 @@ class UserCubit extends Cubit<UserState> {
 
       final response = await userRepo.updateUser(id, userModel);
 
-      if(response != null){
-        emit(state.copyWith(status: UserStatus.success));
+      final userList = await userRepo.fetchUser();
+      if (response != null) {
+        emit(state.copyWith(status: UserStatus.success, userModel: userList));
       }
-
     } catch (e) {
-      throw Exception("Failed to delete user: $e");
+      throw Exception("Failed to update user: $e");
     }
   }
 }
